@@ -4,7 +4,10 @@ import { delay } from "q";
 
 const messageWaitForRegister = '请输入“/register <密码> <再输入一次以确定密码>”以注册';
 const messageWaitForLogin = '请输入“/login <密码>”以登录';
-const messageRegisterFailed = '当前IP注册量达到上限，如果是校园网玩家请联系服主解决!';
+const messageRegisterFailed = [
+	'当前IP注册量达到上限，如果是校园网玩家请联系服主解决!',
+	'此用户名还未注册过'
+];
 const messageLoggedIn = '已成功登录！';
 
 function randomString(len: number) {
@@ -21,15 +24,17 @@ function getChatMessageTexts(rawMessage: ChatMessage): string[] {
 
 type MessageQueueMap = Map<string, (message: string) => void>;
 
-function waitForMessage(messageWaitQueue: MessageQueueMap, messageToResolve: string, messageToReject?: string): Promise<string> {
+function waitForMessage(messageWaitQueue: MessageQueueMap, messageToResolve: string, messagesToReject?: string[]): Promise<string> {
 	return new Promise((resolve, reject) => {
 		messageWaitQueue.set(messageToResolve, (message: string) => {
 			resolve(message);
 		});
-		if (messageToReject) {
-			messageWaitQueue.set(messageToReject, (message: string) => {
-				reject(message);
-			});
+		if (messagesToReject) {
+			for (let messageToReject of messagesToReject) {
+				messageWaitQueue.set(messageToReject, (message: string) => {
+					reject(message);
+				});
+			}
 		}
 	});
 }
@@ -65,7 +70,7 @@ async function runOnce(targetUser: string) {
 	//await delay(1000);
 	try {
 		console.log(`Waiting for connect.`);
-		await waitForMessage(messageWaitQueue, messageWaitForRegister, messageWaitForLogin);
+		await waitForMessage(messageWaitQueue, messageWaitForRegister, [messageWaitForLogin]);
 		console.log(`Registering.`);
 		bot.chat(`/reg ${password} ${password}`);
 		await waitForMessage(messageWaitQueue, messageLoggedIn, messageRegisterFailed);
