@@ -17,20 +17,20 @@ docker:
     - docker build --pull -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
-pack:
-  stage: build
-  image: node:14-buster-slim
-  tags:
-    - linux
-  dependencies: []
-  artifacts:
-    paths:
-      - dist/
-  script:
-    - apt update && apt -y install python3 build-essential
-    - npm ci
-    - npm run build
-    - npm run pack
+#pack:
+#  stage: build
+#  image: node:14-buster-slim
+#  tags:
+#    - linux
+#  dependencies: []
+#  artifacts:
+#    paths:
+#      - dist/
+#  script:
+#    - apt update && apt -y install python3 build-essential
+#    - npm ci
+#    - npm run build
+#    - npm run pack
 
 deploy_latest:
   stage: deploy
