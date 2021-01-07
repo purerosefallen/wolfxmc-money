@@ -4,8 +4,16 @@
   "description": "Offers money to a specific account",
   "main": "build/run.js",
   "scripts": {
+    "pack": "mkdir dist ; ./node_modules/.bin/pkg --out-path dist .",
     "build": "tsc",
     "test": "node build/run.js Irrlicht"
+  },
+  "bin": "build/run.js",
+  "pkg": {
+    "scripts": [
+      "build/*.js"
+    ],
+    "assets": []
   },
   "repository": {
     "type": "git",
@@ -18,6 +26,7 @@
     "@types/q": "^1.5.4",
     "@types/underscore": "^1.10.24",
     "mineflayer": "^2.40.1",
+    "pkg": "^4.4.9",
     "q": "^1.5.1",
     "typescript": "^4.1.3",
     "underscore": "^1.12.0"
