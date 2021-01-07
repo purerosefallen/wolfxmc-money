@@ -19,7 +19,7 @@ docker:
 
 pack:
   stage: build
-  image: node:buster-slim
+  image: node:14-buster-slim
   tags:
     - linux
   dependencies: []
