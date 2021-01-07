@@ -4,6 +4,7 @@
   "description": "Offers money to a specific account",
   "main": "build/run.js",
   "scripts": {
+    "build": "tsc",
     "test": "node build/run.js Irrlicht"
   },
   "repository": {

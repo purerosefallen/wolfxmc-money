@@ -11,14 +11,6 @@ function randomString(len: number) {
 	return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').slice(0, len);
 };
 
-async function waitBotLogin(bot: Bot) {
-	return new Promise(done => {
-		bot.once("spawn", () => {
-			done();
-		})
-	})
-}
-
 function getChatMessageTexts(rawMessage: ChatMessage): string[] {
 	const messageObjects = (rawMessage.json as any).extra as any[];
 	if (!messageObjects) {
@@ -49,7 +41,7 @@ async function runOnce(targetUser: string) {
 	console.log(`Creating bot ${username} ${password}.`);
 	const bot = createBot({
 		username,
-		host: '43.248.187.76',
+		host: 'wolfxmc.org',
 		port: 25565
 	});
 	bot.on('message', (message) => {

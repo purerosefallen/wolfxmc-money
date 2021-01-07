@@ -5,5 +5,6 @@ COPY ./package*.json ./
 RUN npm ci
 COPY . ./
 RUN npm run build
+ENV USERNAME Irrlicht
 
-CMD ["npm", "run", "start"]
+CMD ["./run.sh"]
