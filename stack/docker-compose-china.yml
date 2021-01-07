@@ -2,6 +2,6 @@ version: '2.2'
 services:
   wolfx:
     image: ccr.ccs.tencentyun.com/nanahira/wolfx:latest
-    scale: 10
+    scale: 5
     environment:
       USERNAME: irrlicht
