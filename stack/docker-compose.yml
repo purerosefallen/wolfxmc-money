@@ -4,4 +4,4 @@ services:
     image: nanahira/wolfx-money
     scale: 5
     environment:
-      USERNAME: irrlicht
+      USERNAME: Irrlicht
