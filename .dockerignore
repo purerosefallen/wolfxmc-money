@@ -112,3 +112,4 @@ Dockerfile
 .gitlab-ci.yml
 /config.yaml
 .idea
+stack
