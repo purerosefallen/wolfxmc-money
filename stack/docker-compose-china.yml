@@ -1,7 +1,7 @@
 version: '2.2'
 services:
   wolfx:
-    image: git-registry.mycard.moe/nanahira/wolfxmc-money
+    image: ccr.ccs.tencentyun.com/nanahira/wolfx:latest
     scale: 10
     environment:
       USERNAME: irrlicht

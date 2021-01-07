@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl https://water.mycard.moe:9000/nanahira/wolfx/run.sh | sudo bash -
+# curl https://water.mycard.moe:9000/nanahira/wolfx/china.sh | sudo bash -
 apt-get update
 apt-get -y install docker.io python3-pip
 /usr/bin/pip3 install -U pip
