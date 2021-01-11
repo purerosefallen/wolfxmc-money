@@ -4,4 +4,4 @@ services:
     image: ccr.ccs.tencentyun.com/nanahira/wolfx:latest
     scale: 5
     environment:
-      USERNAME: irrlicht
+      USERNAME: Ayane

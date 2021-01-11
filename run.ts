@@ -2,6 +2,8 @@ import { Bot, ChatMessage, createBot } from "mineflayer";
 import crypto from "crypto";
 import { delay } from "q";
 
+let exitCode = 1;
+
 const messageWaitForRegister = '请输入“/register <密码> <再输入一次以确定密码>”以注册';
 const messageWaitForLogin = '请输入“/login <密码>”以登录';
 const messageRegisterFailed = [
@@ -43,7 +45,7 @@ async function runOnce(targetUser: string) {
 	const username = randomString(10);
 	const password = randomString(8);
 	const messageWaitQueue: MessageQueueMap = new Map();
-	console.log(`Creating bot ${username} ${password}.`);
+	console.error(`Creating bot ${username} ${password}.`);
 	const bot = createBot({
 		username,
 		host: 'wolfxmc.org',
@@ -52,7 +54,7 @@ async function runOnce(targetUser: string) {
 	bot.on('message', (message) => {
 		const messageLines = getChatMessageTexts(message);
 		for (let line of messageLines) {
-			console.log(`Message: ${line}`);
+			console.error(`Message: ${line}`);
 			if (line.match(/已发送到/)) {
 				line = '_send_success';
 			}
@@ -65,24 +67,27 @@ async function runOnce(targetUser: string) {
 	});
 	bot.on('end', () => {
 		console.error(`Bot disconnected.`);
+		process.exit(exitCode);
 	});
 	//await waitBotLogin(bot);
 	//await delay(1000);
 	try {
-		console.log(`Waiting for connect.`);
+		console.error(`Waiting for connect.`);
 		await waitForMessage(messageWaitQueue, messageWaitForRegister, [messageWaitForLogin]);
-		console.log(`Registering.`);
+		console.error(`Registering.`);
 		bot.chat(`/reg ${password} ${password}`);
 		await waitForMessage(messageWaitQueue, messageLoggedIn, messageRegisterFailed);
-		console.log(`Paying 1000 to ${targetUser}.`);
+		console.error(`Paying 1000 to ${targetUser}.`);
 		bot.chat(`/pay ${targetUser} 1000`);
 		await waitForMessage(messageWaitQueue, '_send_success');
 		console.log(`Success.`);
+		exitCode = 0;
 	} catch (e) {
-		console.error(`Failed: ${e.toString()}`);
+		console.log(`Failed: ${e.toString()}`);
+		exitCode = 2;
 	} finally {
 		bot.end();
-		console.log(`Finished.`);
+		console.error(`Finished.`);
 	}
 }
 runOnce(process.argv[2]);
