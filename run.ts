@@ -1,92 +1,42 @@
 import { Bot, ChatMessage, createBot } from "mineflayer";
 import crypto from "crypto";
 import { delay } from "q";
+import { messageLoggedIn, messageRegisterFailed, messageWaitForLogin, messageWaitForRegister } from "./constants";
+import { Minecraft } from "./minecraft";
 
 let exitCode = 1;
-
-const messageWaitForRegister = '请输入“/register <密码> <再输入一次以确定密码>”以注册';
-const messageWaitForLogin = '请输入“/login <密码>”以登录';
-const messageRegisterFailed = [
-	'当前IP注册量达到上限，如果是校园网玩家请联系服主解决!',
-	'此用户名还未注册过'
-];
-const messageLoggedIn = '已成功登录！';
 
 function randomString(len: number) {
 	return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').slice(0, len);
 };
 
-function getChatMessageTexts(rawMessage: ChatMessage): string[] {
-	const messageObjects = (rawMessage.json as any).extra as any[];
-	if (!messageObjects) {
-		return [];
-	}
-	return messageObjects.map(messageObject => messageObject.text as string);
-}
-
-type MessageQueueMap = Map<string, (message: string) => void>;
-
-function waitForMessage(messageWaitQueue: MessageQueueMap, messageToResolve: string, messagesToReject?: string[]): Promise<string> {
-	return new Promise((resolve, reject) => {
-		messageWaitQueue.set(messageToResolve, (message: string) => {
-			resolve(message);
-		});
-		if (messagesToReject) {
-			for (let messageToReject of messagesToReject) {
-				messageWaitQueue.set(messageToReject, (message: string) => {
-					reject(message);
-				});
-			}
-		}
-	});
-}
-
 async function runOnce(targetUser: string) {
 	const username = randomString(10);
 	const password = randomString(8);
-	const messageWaitQueue: MessageQueueMap = new Map();
 	console.error(`Creating bot ${username} ${password}.`);
-	const bot = createBot({
+	const mc = new Minecraft({
 		username,
 		host: 'wolfxmc.org',
 		port: 25565
-	});
-	bot.on('message', (message) => {
-		const messageLines = getChatMessageTexts(message);
-		for (let line of messageLines) {
-			console.error(`Message: ${line}`);
-			if (line.match(/已发送到/)) {
-				line = '_send_success';
-			}
-			if (messageWaitQueue.has(line)) {
-				const fun = messageWaitQueue.get(line);
-				messageWaitQueue.delete(line);
-				fun(line);
-			}
-		}
-	});
-	bot.on('end', () => {
-		console.error(`Bot disconnected.`);
-		process.exit(exitCode);
 	});
 	//await waitBotLogin(bot);
 	//await delay(1000);
 	try {
 		console.error(`Waiting for connect.`);
-		await waitForMessage(messageWaitQueue, messageWaitForRegister, [messageWaitForLogin]);
+		await mc.waitForMessage(messageWaitForRegister, [messageWaitForLogin]);
 		console.error(`Registering.`);
-		bot.chat(`/reg ${password} ${password}`);
-		await waitForMessage(messageWaitQueue, messageLoggedIn, messageRegisterFailed);
+		mc.bot.chat(`/reg ${password} ${password}`);
+		await mc.waitForMessage(messageLoggedIn, messageRegisterFailed);
 		console.error(`Paying 1000 to ${targetUser}.`);
-		bot.chat(`/pay ${targetUser} 1000`);
-		await waitForMessage(messageWaitQueue, '_send_success');
+		mc.bot.chat(`/pay ${targetUser} 1000`);
+		await mc.waitForMessage('_send_success', ["玩家未在线（或不存在）"]);
 		console.log(`Success.`);
 		exitCode = 0;
 	} catch (e) {
 		console.log(`Failed: ${e.toString()}`);
 		exitCode = 2;
 	} finally {
-		bot.end();
+		mc.bot.end();
 		console.error(`Finished.`);
 	}
 }
