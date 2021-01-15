@@ -114,3 +114,4 @@ Dockerfile
 .idea
 stack
 /dict.txt
+/data

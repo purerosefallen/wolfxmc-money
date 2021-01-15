@@ -1,5 +1,5 @@
 import { Bot, BotOptions, ChatMessage, createBot } from "mineflayer";
-import Bunyan from "bunyan";
+import Bunyan, { LogLevel } from "bunyan";
 
 export type MessageQueueMap = Map<string, (message: string) => void>;
 
@@ -33,8 +33,8 @@ export class Minecraft {
 			}
 		}
 	}
-	constructor(options: BotOptions) {
-		this.log = Bunyan.createLogger({ name: options.username });
+	constructor(options: BotOptions, debugLevel?: LogLevel) {
+		this.log = Bunyan.createLogger({ name: options.username, level: debugLevel });
 		this.options = options;
 		this.bot = createBot(options);
 		this.messageWaitQueue = new Map();
